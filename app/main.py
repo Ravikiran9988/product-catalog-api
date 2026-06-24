@@ -1,17 +1,20 @@
 from contextlib import asynccontextmanager
+import logging
 
 from fastapi import FastAPI, HTTPException, status
 from sqlalchemy import text
 
 from app.api.routes import products
-from app.config import get_settings
+from app.config import get_settings, log_database_config
 from app.database import engine
 
+logging.basicConfig(level=logging.INFO)
 settings = get_settings()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    log_database_config(settings)
     yield
     await engine.dispose()
 
