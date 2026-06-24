@@ -11,7 +11,8 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.config import get_settings
-from app.database import Base, get_db
+from app.database import get_db
+from app.models.base import Base
 from app.main import app
 from app.models.product import Product
 

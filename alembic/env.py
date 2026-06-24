@@ -1,4 +1,11 @@
-"""Alembic migration environment."""
+"""
+Alembic migration environment (async).
+
+Official SQLAlchemy pattern: create a local async engine via async_engine_from_config,
+run synchronous Alembic migration functions inside connection.run_sync().
+
+Do not import the application engine from app.database.
+"""
 
 import asyncio
 from logging.config import fileConfig
@@ -9,8 +16,8 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.config import get_settings
-from app.database import Base
 from app.models import product  # noqa: F401
+from app.models.base import Base
 
 config = context.config
 settings = get_settings()
@@ -18,12 +25,14 @@ settings = get_settings()
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-config.set_main_option("sqlalchemy.url", settings.database_url)
+# Render provides postgresql:// — must be postgresql+asyncpg:// for async engine.
+config.set_main_option("sqlalchemy.url", settings.async_database_url)
 
 target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
+    """Run migrations in 'offline' mode (SQL script generation)."""
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -57,6 +66,7 @@ async def run_async_migrations() -> None:
 
 
 def run_migrations_online() -> None:
+    """Run migrations in 'online' mode."""
     asyncio.run(run_async_migrations())
 
 
